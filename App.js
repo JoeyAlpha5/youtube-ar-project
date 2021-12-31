@@ -14,6 +14,12 @@ import {
 
 
 const InititalScene = (props)=>{
+
+  const [rotation,setRotation] =useState([-45,50,40]);
+  const [position,setPosition] =useState([0,0,-5]);
+  const [tvScale,setTvScale] =useState([0.005,0.005,0.005]);
+  const [skullScale,setSkullScale] =useState([0.05,0.05,0.05]);
+
   let data = props.sceneNavigator.viroAppProps;
   ViroMaterials.createMaterials({
     tv:{
@@ -30,25 +36,66 @@ const InititalScene = (props)=>{
     }
   })
 
+  // move objects on drag
+  const moveObject = (newPosition) =>{
+    setPosition(newPosition);
+  }
+
+  //rotate object
+  const rotateObject = (rotateState, rotationFactor, source)=>{
+    if(rotateState === 3){
+      let newRotation = [rotation[0] - rotationFactor,rotation[1] - rotationFactor,rotation[2] - rotationFactor];
+      setRotation(newRotation);
+    }
+  }
+
+
+  // scale function
+  const scaleSkullObject = (pinchState, scaleFactor, source)=>{
+    if(pinchState === 3){
+      let currentScale = skullScale[0];
+      let newScale = currentScale*scaleFactor;
+      let newScaleArray = [newScale,newScale,newScale];
+      setSkullScale(newScaleArray);
+    }
+
+  }
+
+
+  const scaleTvObject = (pinchState, scaleFactor, source)=>{
+    if(pinchState === 3){
+      let currentScale = tvScale[0];
+      let newScale = currentScale*scaleFactor;
+      let newScaleArray = [newScale,newScale,newScale];
+      setTvScale(newScaleArray);
+    }
+  }
+
   return(
     <ViroARScene>
       <ViroAmbientLight color="#ffffff"/>
       {data.object === "skull"?
             <Viro3DObject
               source={require('./assets/skull/12140_Skull_v3_L2.obj')}
-              position={[0,0,-5]}
-              scale={[0.05,0.05,0.05]}
-              rotation={[-45,50,40]}
+              position={position}
+              scale={skullScale}
+              rotation={rotation}
               type="OBJ"
+              onDrag={moveObject}
+              onRotate={rotateObject}
+              onPinch={scaleSkullObject}
             />
             :
             <Viro3DObject
               source={require('./assets/tv/Old_Tv/Old_Tv.obj')}
-              position={[0,0,-5]}
-              scale={[0.005,0.005,0.005]}
-              rotation={[-45,50,40]}
+              position={position}
+              scale={tvScale}
+              rotation={rotation}
               materials={["tv"]}
               type="OBJ"
+              onDrag={moveObject}
+              onRotate={rotateObject}
+              onPinch={scaleTvObject}
             />
 
       }
